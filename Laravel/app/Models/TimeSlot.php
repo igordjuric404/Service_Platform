@@ -29,6 +29,6 @@ class TimeSlot extends Model
 
     public function job()
     {
-        return $this->hasOne(Job::class, 'time_slot_id');
+        return $this->hasOne(Appointment::class, 'time_slot_id');
     }
 }

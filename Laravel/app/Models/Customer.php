@@ -15,7 +15,7 @@ class Customer extends User
 
     public function jobs()
     {
-        return $this->hasMany(Job::class, 'customer_id');
+        return $this->hasMany(Appointment::class, 'customer_id');
     }
 
     public function reviews()

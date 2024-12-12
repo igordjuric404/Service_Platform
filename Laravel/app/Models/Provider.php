@@ -25,6 +25,6 @@ class Provider extends User
 
     public function jobs()
     {
-        return $this->hasManyThrough(Job::class, Service::class, 'provider_id', 'service_id');
+        return $this->hasManyThrough(Appointment::class, Service::class, 'provider_id', 'service_id');
     }
 }
