@@ -9,12 +9,8 @@ return new class extends Migration
     public function up()
     {
         Schema::table('reviews', function (Blueprint $table) {
-            if (Schema::hasColumn('reviews', 'provider_id')) {
-                $table->foreign('provider_id')
-                      ->references('id')
-                      ->on('users')
-                      ->onDelete('cascade')
-                      ->onUpdate('cascade');
+            if (!Schema::hasColumn('reviews', 'provider_id')) {
+                $table->foreignId('provider_id')->nullable()->constrained('users')->onDelete('cascade')->onUpdate('cascade');
             }
         });
     }
@@ -22,7 +18,10 @@ return new class extends Migration
     public function down()
     {
         Schema::table('reviews', function (Blueprint $table) {
-            $table->dropForeign(['provider_id']);
+            if (Schema::hasColumn('reviews', 'provider_id')) {
+                $table->dropForeign(['provider_id']);
+                $table->dropColumn('provider_id');
+            }
         });
     }
 };
