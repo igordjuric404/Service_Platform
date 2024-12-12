@@ -21,7 +21,7 @@ class Service extends Model
         return $this->belongsTo(Provider::class, 'provider_id');
     }
 
-    public function jobs()
+    public function appointments()
     {
         return $this->hasMany(Appointment::class, 'service_id');
     }

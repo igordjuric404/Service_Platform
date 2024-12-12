@@ -27,7 +27,7 @@ class TimeSlot extends Model
         return $this->belongsTo(Service::class, 'service_id');
     }
 
-    public function job()
+    public function appointment()
     {
         return $this->hasOne(Appointment::class, 'time_slot_id');
     }
