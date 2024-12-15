@@ -30,7 +30,7 @@ function ServicesList() {
   };
 
   const applyFiltersAndSorting = useCallback(() => {
-    let filtered = services;
+    let filtered = [...services];
 
     if (searchTerm) {
       filtered = filtered.filter(service =>
@@ -44,14 +44,21 @@ function ServicesList() {
       service => service.price >= priceRange[0] && service.price <= priceRange[1]
     );
 
-    if (sortOption === 'price-asc') {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-desc') {
-      filtered.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'title-asc') {
-      filtered.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortOption === 'title-desc') {
-      filtered.sort((a, b) => b.title.localeCompare(a.title));
+    switch (sortOption) {
+      case 'title-asc':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'title-desc':
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      default:
+        break;
     }
 
     setFilteredServices(filtered);
@@ -72,45 +79,58 @@ function ServicesList() {
   return (
     <div className="services-list">
       <h1>Available Services</h1>
-
-      <div className="filters-row">
-        <input
-          type="text"
-          placeholder="Search services..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-bar"
-        />
-        <label>
-          Min Price:
+      <div className="filters-container">
+        <div className="search-filter">
           <input
-            type="number"
-            value={priceRange[0]}
-            onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+            type="text"
+            placeholder="Search services..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-bar"
           />
-        </label>
-        <label>
-          Max Price:
-          <input
-            type="number"
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
-          />
-        </label>
-        <label>
-          Sort By:
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="title-asc">Title (A-Z)</option>
-            <option value="title-desc">Title (Z-A)</option>
-            <option value="price-asc">Price (Low to High)</option>
-            <option value="price-desc">Price (High to Low)</option>
-          </select>
-        </label>
+        </div>
+        <div className="advanced-filters">
+          <div className="filter-group">
+            <label>
+              Min Price:
+              <input
+                type="number"
+                min="0"
+                value={priceRange[0]}
+                onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                className="filter-input"
+              />
+            </label>
+          </div>
+          <div className="filter-group">
+            <label>
+              Max Price:
+              <input
+                type="number"
+                min="0"
+                value={priceRange[1]}
+                onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                className="filter-input"
+              />
+            </label>
+          </div>
+          <div className="filter-group">
+            <label>
+              Sort By:
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="filter-select"
+              >
+                <option value="title-asc">Title (A-Z)</option>
+                <option value="title-desc">Title (Z-A)</option>
+                <option value="price-asc">Price (Low to High)</option>
+                <option value="price-desc">Price (High to Low)</option>
+              </select>
+            </label>
+          </div>
+        </div>
       </div>
-
       {filteredServices.length === 0 ? (
         <p>No services found.</p>
       ) : (
@@ -121,7 +141,7 @@ function ServicesList() {
               <p>{service.description}</p>
               <p><strong>Price:</strong> ${service.price}</p>
               <p><strong>Provider:</strong> <Link to={`/provider/${service.provider.id}`}>{service.provider.name}</Link></p>
-              </li>
+            </li>
           ))}
         </ul>
       )}
