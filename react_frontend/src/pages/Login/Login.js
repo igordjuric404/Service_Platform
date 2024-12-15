@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axiosInstance from '../../api/axios';
+import axiosInstance, { setAuthToken } from '../../api/axios'; 
 import axios from 'axios';
 import './Login.css';
 
@@ -11,19 +11,6 @@ function Login() {
 
   const [message, setMessage] = useState('');
 
-  // Fetch CSRF token on mount
-  useEffect(() => {
-    const getCsrfToken = async () => {
-      try {
-        await axios.get('http://localhost:8000/sanctum/csrf-cookie', { withCredentials: true });
-      } catch (error) {
-        console.error('Failed to fetch CSRF token:', error);
-      }
-    };
-
-    getCsrfToken();
-  }, []);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -32,8 +19,16 @@ function Login() {
     e.preventDefault();
     try {
       const response = await axiosInstance.post('/login', formData);
+
+      const { access_token, token_type } = response.data;
+      localStorage.setItem('access_token', access_token);
+
+      setAuthToken(`${token_type} ${access_token}`);
+
       setMessage(response.data.message || 'Login successful!');
       console.log('User Info:', response.data.user);
+
+      window.location.href = '/profile';
     } catch (error) {
       setMessage(error.response?.data?.message || 'Login failed');
     }
@@ -43,7 +38,6 @@ function Login() {
     <div className="login-page">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        {/* Form Fields */}
         <div>
           <label>Email</label>
           <input
