@@ -7,6 +7,7 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\ProviderController;
+use App\Http\Controllers\AvailabilityController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -55,6 +56,8 @@ Route::get('/provider/{id}', [ProviderController::class, 'show']);
     Route::post('/appointment', [AppointmentController::class, 'store']);
     Route::put('/appointment/{id}', [AppointmentController::class, 'update']); 
     Route::delete('/appointment/{id}', [AppointmentController::class, 'destroy']);
+
+    Route::post('/availability/generate', [AvailabilityController::class, 'generate']);
 
     Route::post('/time-slot', [TimeSlotController::class, 'store']);
     Route::put('/time-slot/{id}', [TimeSlotController::class, 'update']);

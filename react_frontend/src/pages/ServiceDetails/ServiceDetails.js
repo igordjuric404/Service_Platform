@@ -12,7 +12,7 @@ function ServiceDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null); // Start with no date selected
   const [availableSlots, setAvailableSlots] = useState([]);
   const [bookingError, setBookingError] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(null);
@@ -62,7 +62,10 @@ function ServiceDetails() {
   };
 
   const filterSlotsByDate = () => {
-    if (!selectedDate) return;
+    if (!selectedDate) {
+      setAvailableSlots([]);
+      return;
+    }
 
     const formattedDate = format(selectedDate, 'yyyy-MM-dd');
 
@@ -78,34 +81,35 @@ function ServiceDetails() {
     setBookingError(null);
     setBookingSuccess(null);
     try {
-      // Create a new appointment
       await axios.post('/appointment', {
         service_id: id,
         customer_id: customerId,
         time_slot_id: timeSlotId,
         status: 'pending',
       });
-  
-      // Update the time slots state
+
       setTimeSlots((prevSlots) => {
         const updatedSlots = prevSlots.filter((slot) => slot.id !== timeSlotId);
-  
-        // Check if there are any remaining slots for the same date
+
         const bookedSlot = prevSlots.find((slot) => slot.id === timeSlotId);
         const slotDate = format(parseISO(bookedSlot.start_time), 'yyyy.MM.dd');
-  
+
         if (!updatedSlots.some((slot) =>
           format(parseISO(slot.start_time), 'yyyy.MM.dd') === slotDate
         )) {
-          // Remove the date from availableDates if no slots are left
           setAvailableDates((prevDates) =>
             prevDates.filter((date) => date !== slotDate)
           );
+
+          // Clear available slots if no slots remain for the selected date
+          if (format(selectedDate, 'yyyy.MM.dd') === slotDate) {
+            setAvailableSlots([]);
+          }
         }
-  
+
         return updatedSlots;
       });
-  
+
       setBookingSuccess('Appointment booked successfully!');
     } catch (err) {
       console.error('Error booking appointment:', err);
@@ -122,7 +126,6 @@ function ServiceDetails() {
       }
     }
   };
-  
 
   const tileClassName = ({ date, view }) => {
     if (view === 'month') {
@@ -144,10 +147,10 @@ function ServiceDetails() {
   };
 
   const displaySelectedDate = () => {
-    if (isToday(selectedDate)) {
+    if (selectedDate && isToday(selectedDate)) {
       return 'Today';
     }
-    return format(selectedDate, 'dd.MM.yyyy');
+    return selectedDate ? format(selectedDate, 'dd.MM.yyyy') : null;
   };
 
   if (loading) {
@@ -173,21 +176,24 @@ function ServiceDetails() {
         tileClassName={tileClassName}
       />
 
-      <h2>Available Time Slots for {displaySelectedDate()}</h2>
+      {/* Display success or error messages */}
       {bookingError && <p className="error">{bookingError}</p>}
       {bookingSuccess && <p className="success">{bookingSuccess}</p>}
-      {availableSlots.length === 0 ? (
-        <p>No available time slots for this date.</p>
-      ) : (
-        <ul className="time-slot-list">
-          {availableSlots.map((slot) => (
-            <li key={slot.id}>
-              <p><strong>Start:</strong> {format(parseISO(slot.start_time), 'HH:mm')}</p>
-              <p><strong>End:</strong> {format(parseISO(slot.end_time), 'HH:mm')}</p>
-              <button onClick={() => bookAppointment(slot.id)}>Book this slot</button>
-            </li>
-          ))}
-        </ul>
+
+      {/* Conditionally render available slots */}
+      {selectedDate && availableSlots.length > 0 && (
+        <>
+          <h2>Available Time Slots for {displaySelectedDate()}</h2>
+          <ul className="time-slot-list">
+            {availableSlots.map((slot) => (
+              <li key={slot.id}>
+                <p><strong>Start:</strong> {format(parseISO(slot.start_time), 'HH:mm')}</p>
+                <p><strong>End:</strong> {format(parseISO(slot.end_time), 'HH:mm')}</p>
+                <button onClick={() => bookAppointment(slot.id)}>Book this slot</button>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );
