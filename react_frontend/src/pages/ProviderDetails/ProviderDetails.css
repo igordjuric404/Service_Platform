@@ -1,46 +1,202 @@
+:root {
+  --primary-color: #4a90e2;
+  --secondary-color: #f5f5f5;
+  --accent-color: #50e3c2;
+  --text-color: #333;
+  --border-color: #ddd;
+  --hover-shadow: rgba(0, 0, 0, 0.1);
+  --transition-speed: 0.3s;
+  --max-width: 1200px;
+}
+
 .provider-details {
   padding: 2rem;
-  max-width: 800px;
+  max-width: var(--max-width);
   margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--text-color);
 }
 
 .provider-details h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  font-size: 2rem;
+}
+
+.provider-details p {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.services-section,
+.reviews-section {
+  margin-top: 2rem;
+}
+
+.services-section h2,
+.reviews-section h2 {
+  color: var(--primary-color);
+  font-size: 1.75rem;
   margin-bottom: 1rem;
 }
 
-.service-items, .review-items {
+.filters-container {
+  background-color: var(--secondary-color);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--hover-shadow);
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.search-filter {
+  flex: 1;
+}
+
+.search-bar {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: border-color var(--transition-speed);
+}
+
+.search-bar:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.advanced-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-group label {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: var(--text-color);
+}
+
+.filter-input,
+.filter-select {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  transition: border-color var(--transition-speed);
+}
+
+.filter-input:focus,
+.filter-select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+.service-items,
+.review-items {
   list-style-type: none;
   padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
 }
 
-.service-item, .review-item {
-  border: 1px solid #ccc;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
+@media (min-width: 600px) {
+  .service-items,
+  .review-items {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 900px) {
+  .service-items,
+  .review-items {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.service-item,
+.review-item {
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: box-shadow var(--transition-speed), transform var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.service-item:hover,
+.review-item:hover {
+  box-shadow: 0 4px 12px var(--hover-shadow);
+  transform: translateY(-4px);
+}
+
+.service-item h3,
+.review-item p strong {
+  color: var(--primary-color);
 }
 
 .service-item h3 {
   margin-top: 0;
-}
-.filters-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
 }
 
-.filters-row input, .filters-row select {
-  padding: 0.5rem;
-  font-size: 1rem;
-  max-width: 200px;
+.review-item p {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
 }
 
-.search-bar {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 1rem;
-  min-width: 200px;
+.provider-details p strong {
+  color: var(--primary-color);
+}
+
+.provider-details p:last-child {
+  margin-bottom: 1rem;
+}
+
+.provider-details p a {
+  color: var(--accent-color);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+.provider-details p a:hover {
+  color: var(--primary-color);
+}
+
+@media (max-width: 600px) {
+  .filters-container {
+    padding: 1rem;
+  }
+
+  .service-item,
+  .review-item {
+    padding: 1rem;
+  }
+
+  .service-item h3 {
+    font-size: 1.25rem;
+  }
+
+  .reviews-section h2,
+  .services-section h2 {
+    font-size: 1.5rem;
+  }
 }

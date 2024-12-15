@@ -12,7 +12,7 @@ function ProviderDetails() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredServices, setFilteredServices] = useState([]);
   const [sortServicesOption, setSortServicesOption] = useState('title-asc');
-  const [priceRange, setPriceRange] = useState([0, 1000]); // Add price range
+  const [priceRange, setPriceRange] = useState([0, 1000]);
 
   const [minRating, setMinRating] = useState(0);
   const [sortReviewsOption, setSortReviewsOption] = useState('rating-desc');
@@ -35,7 +35,7 @@ function ProviderDetails() {
   const filterAndSortServices = useCallback(() => {
     if (!provider) return;
 
-    let filtered = provider.services;
+    let filtered = [...provider.services];
 
     if (searchTerm) {
       filtered = filtered.filter(service =>
@@ -48,14 +48,21 @@ function ProviderDetails() {
       service => service.price >= priceRange[0] && service.price <= priceRange[1]
     );
 
-    if (sortServicesOption === 'title-asc') {
-      filtered.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortServicesOption === 'title-desc') {
-      filtered.sort((a, b) => b.title.localeCompare(a.title));
-    } else if (sortServicesOption === 'price-asc') {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sortServicesOption === 'price-desc') {
-      filtered.sort((a, b) => b.price - a.price);
+    switch (sortServicesOption) {
+      case 'title-asc':
+        filtered.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'title-desc':
+        filtered.sort((a, b) => b.title.localeCompare(a.title));
+        break;
+      case 'price-asc':
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-desc':
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      default:
+        break;
     }
 
     setFilteredServices(filtered);
@@ -64,16 +71,21 @@ function ProviderDetails() {
   const filterAndSortReviews = useCallback(() => {
     if (!provider) return;
 
-    let filtered = provider.reviews;
+    let filtered = [...provider.reviews];
 
     if (minRating > 0) {
       filtered = filtered.filter(review => review.rating >= minRating);
     }
 
-    if (sortReviewsOption === 'rating-asc') {
-      filtered.sort((a, b) => a.rating - b.rating);
-    } else if (sortReviewsOption === 'rating-desc') {
-      filtered.sort((a, b) => b.rating - a.rating);
+    switch (sortReviewsOption) {
+      case 'rating-asc':
+        filtered.sort((a, b) => a.rating - b.rating);
+        break;
+      case 'rating-desc':
+        filtered.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        break;
     }
 
     setFilteredReviews(filtered);
@@ -106,95 +118,123 @@ function ProviderDetails() {
       <p><strong>Type:</strong> {provider.type}</p>
       <p><strong>Email:</strong> {provider.email}</p>
       
-      <h2>Services</h2>
-      <div className="filters-row">
-        <input
-          type="text"
-          placeholder="Search services..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-bar"
-        />
-        <label>
-          Min Price:
-          <input
-            type="number"
-            value={priceRange[0]}
-            onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
-          />
-        </label>
-        <label>
-          Max Price:
-          <input
-            type="number"
-            value={priceRange[1]}
-            onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
-          />
-        </label>
-        <label>
-          Sort By:
-          <select
-            value={sortServicesOption}
-            onChange={(e) => setSortServicesOption(e.target.value)}
-          >
-            <option value="title-asc">Title (A-Z)</option>
-            <option value="title-desc">Title (Z-A)</option>
-            <option value="price-asc">Price (Low to High)</option>
-            <option value="price-desc">Price (High to Low)</option>
-          </select>
-        </label>
-      </div>
-      {filteredServices.length > 0 ? (
-        <ul className="service-items">
-          {filteredServices.map(service => (
-            <li key={service.id} className="service-item">
-              <h3>{service.title}</h3>
-              <p>{service.description}</p>
-              <p><strong>Price:</strong> ${service.price}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No services available.</p>
-      )}
+      {/* Services Section */}
+      <section className="services-section">
+        <h2>Services</h2>
+        <div className="filters-container">
+          <div className="search-filter">
+            <input
+              type="text"
+              placeholder="Search services..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-bar"
+            />
+          </div>
+          <div className="advanced-filters">
+            <div className="filter-group">
+              <label>
+                Min Price:
+                <input
+                  type="number"
+                  min="0"
+                  value={priceRange[0]}
+                  onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                  className="filter-input"
+                />
+              </label>
+            </div>
+            <div className="filter-group">
+              <label>
+                Max Price:
+                <input
+                  type="number"
+                  min="0"
+                  value={priceRange[1]}
+                  onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                  className="filter-input"
+                />
+              </label>
+            </div>
+            <div className="filter-group">
+              <label>
+                Sort By:
+                <select
+                  value={sortServicesOption}
+                  onChange={(e) => setSortServicesOption(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="title-asc">Title (A-Z)</option>
+                  <option value="title-desc">Title (Z-A)</option>
+                  <option value="price-asc">Price (Low to High)</option>
+                  <option value="price-desc">Price (High to Low)</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+        {filteredServices.length > 0 ? (
+          <ul className="service-items">
+            {filteredServices.map(service => (
+              <li key={service.id} className="service-item">
+                <h3>{service.title}</h3>
+                <p>{service.description}</p>
+                <p><strong>Price:</strong> ${service.price}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No services available.</p>
+        )}
+      </section>
 
-      <h2>Reviews</h2>
-      <div className="filters-row">
-        <label>
-          Min Rating:
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="1"
-            value={minRating}
-            onChange={(e) => setMinRating(+e.target.value)}
-          />
-        </label>
-        <label>
-          Sort By:
-          <select
-            value={sortReviewsOption}
-            onChange={(e) => setSortReviewsOption(e.target.value)}
-          >
-            <option value="rating-desc">Rating (High to Low)</option>
-            <option value="rating-asc">Rating (Low to High)</option>
-          </select>
-        </label>
-      </div>
-      {filteredReviews.length > 0 ? (
-        <ul className="review-items">
-          {filteredReviews.map(review => (
-            <li key={review.id} className="review-item">
-              <p><strong>Customer:</strong> {review.customer.name}</p>
-              <p><strong>Rating:</strong> {review.rating} / 5</p>
-              <p>{review.comment}</p>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>No reviews yet.</p>
-      )}
+      <section className="reviews-section">
+        <h2>Reviews</h2>
+        <div className="filters-container">
+          <div className="advanced-filters">
+            <div className="filter-group">
+              <label>
+                Min Rating:
+                <input
+                  type="number"
+                  min="0"
+                  max="5"
+                  step="1"
+                  value={minRating}
+                  onChange={(e) => setMinRating(+e.target.value)}
+                  className="filter-input"
+                />
+              </label>
+            </div>
+            <div className="filter-group">
+              <label>
+                Sort By:
+                <select
+                  value={sortReviewsOption}
+                  onChange={(e) => setSortReviewsOption(e.target.value)}
+                  className="filter-select"
+                >
+                  <option value="rating-desc">Rating (High to Low)</option>
+                  <option value="rating-asc">Rating (Low to High)</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+        {filteredReviews.length > 0 ? (
+          <ul className="review-items">
+            {filteredReviews.map(review => (
+              <li key={review.id} className="review-item">
+                <p><strong>Customer:</strong> {review.customer.name}</p>
+                <p><strong>Rating:</strong> {review.rating} / 5</p>
+                <p>{review.comment}</p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No reviews yet.</p>
+        )}
+      </section>
     </div>
   );
 }
