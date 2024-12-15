@@ -8,6 +8,7 @@ import ServicesList from "../pages/ServicesList/ServicesList";
 import ServiceDetails from "../pages/ServiceDetails/ServiceDetails";
 import ProvidersList from '../pages/ProvidersList/ProvidersList';
 import ProviderDetails from '../pages/ProviderDetails/ProviderDetails';
+import ProfilePage from '../pages/ProfilePage/ProfilePage';
 
 function AppRoutes() {
     return (
@@ -19,6 +20,7 @@ function AppRoutes() {
                 <Route path="/service/:id" element={<ServiceDetails />} />
                 <Route path="/providers" element={<ProvidersList />} />
                 <Route path="/provider/:id" element={<ProviderDetails />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
             </Routes>

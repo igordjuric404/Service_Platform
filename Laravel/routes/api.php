@@ -31,6 +31,22 @@ Route::get('/provider/{id}', [ProviderController::class, 'show']);
         return $request->user();
     });
 
+    Route::get('/user/{id}', function ($id) {
+      $user = \App\Models\User::findOrFail($id);
+  
+      if ($user->type === 'customer') {
+          $customer = \App\Models\Customer::with(['appointments.service', 'appointments.timeSlot'])->find($id);
+          $user->appointments = $customer ? $customer->appointments : [];
+      } else {
+          $user->appointments = [];
+      }
+  
+      return response()->json($user);
+  });
+  
+
+    
+
     Route::post('/service', [ServiceController::class, 'store']); 
     Route::put('/service/{id}', [ServiceController::class, 'update']);
     Route::delete('/service/{id}', [ServiceController::class, 'destroy']);

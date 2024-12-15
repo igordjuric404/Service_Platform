@@ -1,0 +1,48 @@
+.profile-page {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.profile-header h1 {
+  font-size: 2rem;
+  margin: 0.5rem 0;
+}
+
+.profile-header p {
+  margin: 0.3rem 0;
+}
+
+.profile-services,
+.profile-reviews {
+  margin-top: 2rem;
+}
+
+.profile-services ul,
+.profile-reviews ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.profile-services li,
+.profile-reviews li {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+  transition: box-shadow 0.3s;
+}
+
+.profile-services li:hover,
+.profile-reviews li:hover {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  margin-top: 1rem;
+}
