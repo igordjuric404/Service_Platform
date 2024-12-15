@@ -12,15 +12,27 @@
 }
 
 .nav-links li {
-  margin: 0 1rem;
+  margin: 0 0.3rem;
 }
 
-.nav-links a {
+.nav-links a,
+.logout-button {
   text-decoration: none;
   color: white;
   font-size: 1.2rem;
+  cursor: pointer;
+  margin: 0 1rem;
+  padding: 0;
+  display: inline;
+  background: none;
+  border: none;}
+
+.nav-links a:hover,
+.logout-button:hover {
+  text-decoration: underline;
 }
 
-.nav-links a:hover {
-  text-decoration: underline;
+.logout-button {
+  font-family: inherit;
+  line-height: inherit;
 }

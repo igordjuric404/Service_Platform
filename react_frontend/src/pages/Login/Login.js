@@ -21,9 +21,10 @@ function Login() {
       const response = await axiosInstance.post('/login', formData);
 
       const { access_token, token_type } = response.data;
+
       localStorage.setItem('access_token', access_token);
 
-      setAuthToken(`${token_type} ${access_token}`);
+      setAuthToken(access_token);
 
       setMessage(response.data.message || 'Login successful!');
       console.log('User Info:', response.data.user);

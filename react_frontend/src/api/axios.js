@@ -16,4 +16,9 @@ export const setAuthToken = (token) => {
     }
 };
 
+const token = localStorage.getItem('access_token');
+if (token) {
+    setAuthToken(token);
+}
+
 export default axiosInstance;

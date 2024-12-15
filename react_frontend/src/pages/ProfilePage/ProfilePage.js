@@ -8,26 +8,28 @@ function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Availability now has start_time AND end_time instead of a single slot
   const [availability, setAvailability] = useState([
-    { day: '', start_time: '', end_time: '', duration: '', service_id: '' }
+    { day: '', start_time: '', end_time: '', duration: '', service_id: '' },
   ]);
 
   const [services, setServices] = useState([]);
   const [successMessage, setSuccessMessage] = useState(null);
   const [submitError, setSubmitError] = useState(null);
 
-  const loggedInUserId = 1;
-
   useEffect(() => {
     fetchUserData();
-    fetchServices();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchServices(); // Fetch services after user data is loaded
+    }
+  }, [user]);
 
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get(`/user/${loggedInUserId}`);
+      const response = await axiosInstance.get('/user'); // Endpoint to get authenticated user's data
       const userData = response.data;
       setUser(userData);
       setAppointments(userData.appointments || []);
@@ -41,10 +43,11 @@ function ProfilePage() {
 
   const fetchServices = async () => {
     try {
-      const response = await axiosInstance.get(`/services?provider_id=${loggedInUserId}`);
+      const response = await axiosInstance.get('/my-services'); // Fetch services for the logged-in user
       setServices(response.data);
     } catch (err) {
       console.error('Error fetching services:', err);
+      setServices([]);
     }
   };
 
@@ -55,7 +58,10 @@ function ProfilePage() {
   };
 
   const addAvailabilitySlot = () => {
-    setAvailability([...availability, { day: '', start_time: '', end_time: '', duration: '', service_id: '' }]);
+    setAvailability([
+      ...availability,
+      { day: '', start_time: '', end_time: '', duration: '', service_id: '' },
+    ]);
   };
 
   const removeAvailabilitySlot = (index) => {
@@ -69,14 +75,13 @@ function ProfilePage() {
     setSuccessMessage(null);
     setSubmitError(null);
 
-    // Validate input
-    if (availability.some(a => !a.day || !a.start_time || !a.end_time || !a.duration || !a.service_id)) {
+    if (availability.some((a) => !a.day || !a.start_time || !a.end_time || !a.duration || !a.service_id)) {
       setSubmitError('Please fill in all fields for each availability slot.');
       return;
     }
 
     try {
-      const formattedAvailability = availability.map(slot => ({
+      const formattedAvailability = availability.map((slot) => ({
         day: slot.day,
         start_time: slot.start_time,
         end_time: slot.end_time,
@@ -84,10 +89,11 @@ function ProfilePage() {
         service_id: slot.service_id,
       }));
 
-      const response = await axiosInstance.post('/availability/generate', {
-        provider_id: loggedInUserId,
-        availability: formattedAvailability
+      await axiosInstance.post('/availability/generate', {
+        provider_id: user.id, // Use logged-in user's ID
+        availability: formattedAvailability,
       });
+
       setSuccessMessage('Availability schedule created successfully!');
     } catch (err) {
       console.error('Error submitting availability:', err);
@@ -97,7 +103,6 @@ function ProfilePage() {
 
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  // A helper function to preview how many slots will be created
   const previewSlots = (start, end, duration) => {
     if (!start || !end || !duration) return null;
     const [startHour, startMinute] = start.split(':').map(Number);
@@ -110,26 +115,35 @@ function ProfilePage() {
 
     const numberOfSlots = Math.floor(totalMinutes / duration);
     const remainder = totalMinutes % duration;
-    if (remainder > 0) {
-      return `${numberOfSlots} full slots will be created (some leftover time is unused).`;
-    } else {
-      return `${numberOfSlots} slots will be created.`;
-    }
+
+    return remainder > 0
+      ? `${numberOfSlots} full slots will be created (some leftover time is unused).`
+      : `${numberOfSlots} slots will be created.`;
   };
 
   if (loading) {
-    return <div className="profile-page"><p>Loading profile...</p></div>;
+    return (
+      <div className="profile-page">
+        <p>Loading profile...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="profile-page"><p>{error}</p></div>;
+    return (
+      <div className="profile-page">
+        <p>{error}</p>
+      </div>
+    );
   }
 
   return (
     <div className="profile-page">
       <div className="profile-header">
         <h1>{user.name}</h1>
-        <p><strong>Email:</strong> {user.email}</p>
+        <p>
+          <strong>Email:</strong> {user.email}
+        </p>
       </div>
 
       {user.type === 'customer' && (
@@ -139,11 +153,16 @@ function ProfilePage() {
             <p>No appointments found.</p>
           ) : (
             <ul>
-              {appointments.map(appointment => (
+              {appointments.map((appointment) => (
                 <li key={appointment.id}>
                   <h3>{appointment.service.title}</h3>
-                  <p><strong>Status:</strong> {appointment.status}</p>
-                  <p><strong>Time Slot:</strong> {appointment.time_slot?.start_time} - {appointment.time_slot?.end_time}</p>
+                  <p>
+                    <strong>Status:</strong> {appointment.status}
+                  </p>
+                  <p>
+                    <strong>Time Slot:</strong> {appointment.time_slot?.start_time} -{' '}
+                    {appointment.time_slot?.end_time}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -170,8 +189,10 @@ function ProfilePage() {
                     onChange={(e) => handleAvailabilityChange(index, 'day', e.target.value)}
                   >
                     <option value="">Select Day</option>
-                    {daysOfWeek.map(day => (
-                      <option key={day} value={day}>{day}</option>
+                    {daysOfWeek.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
                     ))}
                   </select>
 
@@ -203,13 +224,17 @@ function ProfilePage() {
                     onChange={(e) => handleAvailabilityChange(index, 'service_id', e.target.value)}
                   >
                     <option value="">Select Service</option>
-                    {services.map(svc => (
-                      <option key={svc.id} value={svc.id}>{svc.title}</option>
+                    {services.map((svc) => (
+                      <option key={svc.id} value={svc.id}>
+                        {svc.title}
+                      </option>
                     ))}
                   </select>
 
                   {availability.length > 1 && (
-                    <button type="button" onClick={() => removeAvailabilitySlot(index)}>Remove</button>
+                    <button type="button" onClick={() => removeAvailabilitySlot(index)}>
+                      Remove
+                    </button>
                   )}
 
                   {previewMessage && <p className="preview">{previewMessage}</p>}
@@ -225,8 +250,6 @@ function ProfilePage() {
           </form>
         </div>
       )}
-
-
     </div>
   );
 }
