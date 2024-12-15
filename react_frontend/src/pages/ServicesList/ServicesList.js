@@ -120,8 +120,8 @@ function ServicesList() {
               <h2><Link to={`/service/${service.id}`}>{service.title}</Link></h2>
               <p>{service.description}</p>
               <p><strong>Price:</strong> ${service.price}</p>
-              <p><strong>Provider:</strong> {service.provider.name}</p>
-            </li>
+              <p><strong>Provider:</strong> <Link to={`/provider/${service.provider.id}`}>{service.provider.name}</Link></p>
+              </li>
           ))}
         </ul>
       )}
