@@ -13,11 +13,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+      
         $middleware->group('web', [
-
+          \App\Http\Middleware\LogAllRequests::class,
+          \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+          \Illuminate\Session\Middleware\StartSession::class,
+          \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+          \App\Http\Middleware\VerifyCsrfToken::class,
+          \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
         $middleware->group('api', [
+            \App\Http\Middleware\LogAllRequests::class,
             EnsureFrontendRequestsAreStateful::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);

@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axiosInstance from '../../api/axios';
 import axios from 'axios';
-import './Register.css';
+import './Login.css';
 
-function Register() {
+function Login() {
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
-    password_confirmation: '',
   });
 
   const [message, setMessage] = useState('');
 
+  // Fetch CSRF token on mount
   useEffect(() => {
     const getCsrfToken = async () => {
       try {
@@ -32,34 +31,19 @@ function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axiosInstance.post('/register', formData);
-      setMessage(response.data.message || 'Registration successful!');
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-      });
+      const response = await axiosInstance.post('/login', formData);
+      setMessage(response.data.message || 'Login successful!');
+      console.log('User Info:', response.data.user);
     } catch (error) {
-      setMessage(error.response?.data?.message || 'Something went wrong');
+      setMessage(error.response?.data?.message || 'Login failed');
     }
   };
 
   return (
-    <div className="register-page">
-      <h2>Register</h2>
+    <div className="login-page">
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         {/* Form Fields */}
-        <div>
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
         <div>
           <label>Email</label>
           <input
@@ -80,21 +64,11 @@ function Register() {
             required
           />
         </div>
-        <div>
-          <label>Confirm Password</label>
-          <input
-            type="password"
-            name="password_confirmation"
-            value={formData.password_confirmation}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit">Register</button>
+        <button type="submit">Login</button>
       </form>
       {message && <p className="message">{message}</p>}
     </div>
   );
 }
 
-export default Register;
+export default Login;
