@@ -8,6 +8,12 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\AvailabilityController;
+use Laravel\Passport\Http\Controllers\AccessTokenController;
+use Laravel\Passport\Http\Controllers\PersonalAccessTokenController;
+
+Route::post('/oauth/token', [AccessTokenController::class, 'issueToken']);
+Route::post('/oauth/personal-access-tokens', [PersonalAccessTokenController::class, 'store']);
+Route::delete('/oauth/personal-access-tokens/{tokenId}', [PersonalAccessTokenController::class, 'destroy']);
 
 
 Route::post('/register', [AuthController::class, 'register']);
