@@ -9,11 +9,26 @@
   margin-bottom: 1.5rem;
 }
 
-.search-bar {
-  width: 100%;
-  padding: 0.5rem;
+.filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.filters-row input, .filters-row select {
+  padding: 0.5rem;
   font-size: 1rem;
+  max-width: 150px;
+}
+
+.search-bar {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+  min-width: 200px;
 }
 
 .provider-items {

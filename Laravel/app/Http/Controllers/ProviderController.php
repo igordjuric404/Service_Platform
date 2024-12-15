@@ -9,9 +9,14 @@ class ProviderController extends Controller
 {
     public function index()
     {
-        $providers = Provider::all();
-
-        return response()->json($providers);
+        return Provider::withCount(['appointments'])
+            ->withAvg('reviews', 'rating')
+            ->get()
+            ->map(function ($provider) {
+                $provider->average_rating = $provider->reviews_avg_rating ?? 0;
+                $provider->total_appointments = $provider->appointments_count ?? 0;
+                return $provider;
+            });
     }
 
     public function show($id)
