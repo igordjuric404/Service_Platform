@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../api/axios'; // Use the configured axiosInstance
+import { Link } from 'react-router-dom';
 import './ServicesList.css';
 
 function ServicesList() {
@@ -68,11 +69,11 @@ function ServicesList() {
         <ul className="service-items">
           {filteredServices.map(service => (
             <li key={service.id} className="service-item">
-              <h2>{service.title}</h2>
+              <h2><Link to={`/service/${service.id}`}>{service.title}</Link></h2>
               <p>{service.description}</p>
               <p><strong>Price:</strong> ${service.price}</p>
               <p><strong>Provider:</strong> {service.provider.name}</p>
-              {/* Add more details or a link to the service if needed */}
+              {/* Add more details or actions */}
             </li>
           ))}
         </ul>

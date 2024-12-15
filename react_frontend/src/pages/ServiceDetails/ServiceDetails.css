@@ -1,0 +1,13 @@
+.service-details {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.service-details h1 {
+  margin-bottom: 1rem;
+}
+
+.service-details p {
+  margin: 0.5rem 0;
+}
