@@ -9,8 +9,10 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\TimeSlotController;
 use App\Http\Controllers\ProviderController;
 use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\ReviewController;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 use Laravel\Passport\Http\Controllers\PersonalAccessTokenController;
+use App\Models\Customer;
 
 Route::post('/oauth/token', [AccessTokenController::class, 'issueToken']);
 Route::post('/oauth/personal-access-tokens', [PersonalAccessTokenController::class, 'store']);
@@ -34,9 +36,18 @@ Route::get('/provider/{id}', [ProviderController::class, 'show']);
 
 Route::middleware('auth:api')->group(function () {
   Route::get('/user', function (Request $request) {
-      Log::info('Token:', ['token' => $request->bearerToken()]);
-      return $request->user();
-  });
+    $user = $request->user();
+
+    if ($user->type === 'customer') {
+            $customer = Customer::with(['appointments.service', 'appointments.timeSlot', 'appointments.review'])->find($user->id);
+            $user->appointments = $customer ? $customer->appointments : [];
+        } else {
+            $user->appointments = [];
+        }
+
+        return response()->json($user);
+    });
+
 
   Route::get('/user/{id}', function ($id) {
       $user = \App\Models\User::findOrFail($id);
@@ -65,6 +76,8 @@ Route::middleware('auth:api')->group(function () {
   Route::post('/time-slot', [TimeSlotController::class, 'store']);
   Route::put('/time-slot/{id}', [TimeSlotController::class, 'update']);
   Route::delete('/time-slot/{id}', [TimeSlotController::class, 'destroy']);
+
+  Route::post('/reviews', [ReviewController::class, 'store']);
 
   Route::post('/logout', [AuthController::class, 'logout']);
 });

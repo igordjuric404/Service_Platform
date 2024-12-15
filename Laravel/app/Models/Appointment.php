@@ -30,4 +30,9 @@ class Appointment extends Model
     {
         return $this->belongsTo(TimeSlot::class, 'time_slot_id');
     }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class, 'appointment_id');
+    }
 }

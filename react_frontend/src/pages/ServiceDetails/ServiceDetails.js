@@ -2,33 +2,48 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import axios from '../../api/axios'; // Your axios instance
+import axios from '../../api/axios';
 import { format, parseISO, isToday } from 'date-fns';
 import './ServiceDetails.css';
 
 function ServiceDetails() {
   const { id } = useParams();
   const [service, setService] = useState(null);
+  const [user, setUser] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null); // Start with no date selected
+  const [selectedDate, setSelectedDate] = useState(null); 
   const [availableSlots, setAvailableSlots] = useState([]);
   const [bookingError, setBookingError] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(null);
 
-  const customerId = 2;
-
   const [availableDates, setAvailableDates] = useState([]);
 
   useEffect(() => {
-    fetchService();
-    fetchTimeSlots();
-  }, [id]);
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    if (user) {
+      fetchService();
+      fetchTimeSlots();
+    }
+  }, [user, id]);
 
   useEffect(() => {
     filterSlotsByDate();
   }, [selectedDate, timeSlots]);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await axios.get('/user');
+      setUser(response.data);
+    } catch (err) {
+      console.error('Error fetching user data:', err);
+      setError('Failed to fetch user information.');
+    }
+  };
 
   const fetchService = async () => {
     try {
@@ -83,7 +98,7 @@ function ServiceDetails() {
     try {
       await axios.post('/appointment', {
         service_id: id,
-        customer_id: customerId,
+        customer_id: user.id,
         time_slot_id: timeSlotId,
         status: 'pending',
       });
@@ -101,7 +116,6 @@ function ServiceDetails() {
             prevDates.filter((date) => date !== slotDate)
           );
 
-          // Clear available slots if no slots remain for the selected date
           if (format(selectedDate, 'yyyy.MM.dd') === slotDate) {
             setAvailableSlots([]);
           }
@@ -153,6 +167,10 @@ function ServiceDetails() {
     return selectedDate ? format(selectedDate, 'dd.MM.yyyy') : null;
   };
 
+  if (!user) {
+    return <div className="service-details"><p>Loading user information...</p></div>;
+  }
+
   if (loading) {
     return <div className="service-details"><p>Loading service...</p></div>;
   }
@@ -176,11 +194,9 @@ function ServiceDetails() {
         tileClassName={tileClassName}
       />
 
-      {/* Display success or error messages */}
       {bookingError && <p className="error">{bookingError}</p>}
       {bookingSuccess && <p className="success">{bookingSuccess}</p>}
 
-      {/* Conditionally render available slots */}
       {selectedDate && availableSlots.length > 0 && (
         <>
           <h2>Available Time Slots for {displaySelectedDate()}</h2>

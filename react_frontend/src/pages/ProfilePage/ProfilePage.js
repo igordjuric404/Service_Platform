@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../api/axios';
+import { format, parseISO } from 'date-fns';
 import './ProfilePage.css';
 
 function ProfilePage() {
@@ -16,20 +17,25 @@ function ProfilePage() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [submitError, setSubmitError] = useState(null);
 
+  const [reviewingAppointmentId, setReviewingAppointmentId] = useState(null);
+  const [reviewData, setReviewData] = useState({ rating: 5, comment: '' });
+  const [reviewError, setReviewError] = useState(null);
+  const [reviewSuccess, setReviewSuccess] = useState(null);
+
   useEffect(() => {
     fetchUserData();
   }, []);
 
   useEffect(() => {
     if (user) {
-      fetchServices(); // Fetch services after user data is loaded
+      fetchServices();
     }
   }, [user]);
 
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('/user'); // Endpoint to get authenticated user's data
+      const response = await axiosInstance.get('/user');
       const userData = response.data;
       setUser(userData);
       setAppointments(userData.appointments || []);
@@ -43,7 +49,7 @@ function ProfilePage() {
 
   const fetchServices = async () => {
     try {
-      const response = await axiosInstance.get('/my-services'); // Fetch services for the logged-in user
+      const response = await axiosInstance.get('/my-services');
       setServices(response.data);
     } catch (err) {
       console.error('Error fetching services:', err);
@@ -75,7 +81,16 @@ function ProfilePage() {
     setSuccessMessage(null);
     setSubmitError(null);
 
-    if (availability.some((a) => !a.day || !a.start_time || !a.end_time || !a.duration || !a.service_id)) {
+    if (
+      availability.some(
+        (a) =>
+          !a.day ||
+          !a.start_time ||
+          !a.end_time ||
+          !a.duration ||
+          !a.service_id
+      )
+    ) {
       setSubmitError('Please fill in all fields for each availability slot.');
       return;
     }
@@ -90,7 +105,7 @@ function ProfilePage() {
       }));
 
       await axiosInstance.post('/availability/generate', {
-        provider_id: user.id, // Use logged-in user's ID
+        provider_id: user.id,
         availability: formattedAvailability,
       });
 
@@ -101,7 +116,15 @@ function ProfilePage() {
     }
   };
 
-  const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  const daysOfWeek = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+  ];
 
   const previewSlots = (start, end, duration) => {
     if (!start || !end || !duration) return null;
@@ -119,6 +142,56 @@ function ProfilePage() {
     return remainder > 0
       ? `${numberOfSlots} full slots will be created (some leftover time is unused).`
       : `${numberOfSlots} slots will be created.`;
+  };
+
+  const openReviewForm = (appointmentId) => {
+    setReviewingAppointmentId(appointmentId);
+    setReviewData({ rating: 5, comment: '' });
+    setReviewError(null);
+    setReviewSuccess(null);
+  };
+
+  const closeReviewForm = () => {
+    setReviewingAppointmentId(null);
+  };
+
+  const handleReviewChange = (field, value) => {
+    setReviewData({ ...reviewData, [field]: value });
+  };
+
+  const handleSubmitReview = async (appointmentId) => {
+    setReviewError(null);
+    setReviewSuccess(null);
+    try {
+      const response = await axiosInstance.post('/reviews', {
+        appointment_id: appointmentId,
+        rating: reviewData.rating,
+        comment: reviewData.comment,
+      });
+
+      setReviewSuccess('Review submitted successfully!');
+      setAppointments((prevAppointments) =>
+        prevAppointments.map((appointment) =>
+          appointment.id === appointmentId
+            ? { ...appointment, review: response.data.review }
+            : appointment
+        )
+      );
+
+      closeReviewForm();
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      if (err.response && err.response.data.errors) {
+        const errorMessages = Object.values(err.response.data.errors)
+          .flat()
+          .join(' ');
+        setReviewError(errorMessages);
+      } else if (err.response && err.response.data.error) {
+        setReviewError(err.response.data.error);
+      } else {
+        setReviewError('Failed to submit review.');
+      }
+    }
   };
 
   if (loading) {
@@ -160,9 +233,66 @@ function ProfilePage() {
                     <strong>Status:</strong> {appointment.status}
                   </p>
                   <p>
-                    <strong>Time Slot:</strong> {appointment.time_slot?.start_time} -{' '}
-                    {appointment.time_slot?.end_time}
+                    <strong>Time Slot:</strong>{' '}
+                    {appointment.time_slot
+                      ? `${format(parseISO(appointment.time_slot.start_time), 'HH:mm')} - ${format(
+                          parseISO(appointment.time_slot.end_time),
+                          'HH:mm'
+                        )}`
+                      : 'N/A'}
                   </p>
+
+                  {/* Display Review if exists */}
+                  {appointment.review ? (
+                    <div className="review">
+                      <p>
+                        <strong>Your Rating:</strong> {appointment.review.rating}/5
+                      </p>
+                      <p>
+                        <strong>Your Comment:</strong> {appointment.review.comment}
+                      </p>
+                    </div>
+                  ) : appointment.status === 'confirmed' ? (
+                    <button onClick={() => openReviewForm(appointment.id)}>
+                      Leave a Review
+                    </button>
+                  ) : null}
+
+                  {/* Review Form */}
+                  {reviewingAppointmentId === appointment.id && (
+                    <div className="review-form">
+                      <h4>Leave a Review</h4>
+                      {reviewError && <p className="error">{reviewError}</p>}
+                      {reviewSuccess && <p className="success">{reviewSuccess}</p>}
+                      <label>
+                        Rating:
+                        <select
+                          value={reviewData.rating}
+                          onChange={(e) => handleReviewChange('rating', e.target.value)}
+                        >
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <option key={num} value={num}>
+                              {num}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
+                        Comment:
+                        <textarea
+                          value={reviewData.comment}
+                          onChange={(e) => handleReviewChange('comment', e.target.value)}
+                          maxLength="1000"
+                        />
+                      </label>
+                      <button onClick={() => handleSubmitReview(appointment.id)}>
+                        Submit Review
+                      </button>
+                      <button type="button" onClick={closeReviewForm}>
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -173,7 +303,9 @@ function ProfilePage() {
       {(user.type === 'freelancer' || user.type === 'company') && (
         <div className="availability-form">
           <h2>Define Your Weekly Availability</h2>
-          <p>Set a day, start & end times, and a duration. We'll generate slots for the next month.</p>
+          <p>
+            Set a day, start & end times, and a duration. We'll generate slots for the next month.
+          </p>
 
           {submitError && <p className="error">{submitError}</p>}
           {successMessage && <p className="success">{successMessage}</p>}
