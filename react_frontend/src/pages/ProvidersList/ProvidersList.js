@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../api/axios';
+import { Link } from 'react-router-dom';
 import './ProvidersList.css';
 
 function ProvidersList() {
@@ -66,7 +67,7 @@ function ProvidersList() {
         <ul className="provider-items">
           {filteredProviders.map(provider => (
             <li key={provider.id} className="provider-item">
-              <h2>{provider.name}</h2>
+              <h2><Link to={`/provider/${provider.id}`}>{provider.name}</Link></h2>
               <p><strong>Type:</strong> {provider.type}</p>
               <p><strong>Email:</strong> {provider.email}</p>
             </li>

@@ -13,4 +13,11 @@ class ProviderController extends Controller
 
         return response()->json($providers);
     }
+
+    public function show($id)
+    {
+        $provider = Provider::with(['services', 'reviews.customer'])->findOrFail($id);
+
+        return response()->json($provider);
+    }
 }

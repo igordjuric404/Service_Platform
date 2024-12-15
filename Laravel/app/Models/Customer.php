@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class Customer extends User
 {
+    protected $table = 'users';
+
     protected static function booted()
     {
         static::addGlobalScope('customer', function (Builder $builder) {

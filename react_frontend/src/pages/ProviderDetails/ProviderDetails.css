@@ -1,0 +1,25 @@
+.provider-details {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.provider-details h1 {
+  margin-bottom: 1rem;
+}
+
+.service-items, .review-items {
+  list-style-type: none;
+  padding: 0;
+}
+
+.service-item, .review-item {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+.service-item h3 {
+  margin-top: 0;
+}

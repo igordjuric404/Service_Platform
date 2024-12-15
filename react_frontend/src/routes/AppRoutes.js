@@ -7,6 +7,7 @@ import Login from "../pages/Login/Login";
 import ServicesList from "../pages/ServicesList/ServicesList";
 import ServiceDetails from "../pages/ServiceDetails/ServiceDetails";
 import ProvidersList from '../pages/ProvidersList/ProvidersList';
+import ProviderDetails from '../pages/ProviderDetails/ProviderDetails';
 
 function AppRoutes() {
     return (
@@ -17,6 +18,7 @@ function AppRoutes() {
                 <Route path="/services" element={<ServicesList />} />
                 <Route path="/service/:id" element={<ServiceDetails />} />
                 <Route path="/providers" element={<ProvidersList />} />
+                <Route path="/provider/:id" element={<ProviderDetails />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
             </Routes>
