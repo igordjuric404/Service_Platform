@@ -40,3 +40,27 @@
 .service-item p {
   margin: 0.5rem 0;
 }
+
+.filters-row {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+}
+
+.filters-row input, .filters-row select {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.filters-row label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.filters-row input[type="number"] {
+  max-width: 80px;
+}
