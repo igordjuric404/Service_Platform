@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import axios from '../../api/axios'; // Your axios instance
+import { format, parseISO, isToday } from 'date-fns';
 import './ServiceDetails.css';
 
 function ServiceDetails() {
@@ -9,16 +12,23 @@ function ServiceDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [availableSlots, setAvailableSlots] = useState([]);
   const [bookingError, setBookingError] = useState(null);
   const [bookingSuccess, setBookingSuccess] = useState(null);
-  
-  // Hardcoded customer ID (simulate a logged-in customer)
-  const customerId = 2; 
+
+  const customerId = 2;
+
+  const [availableDates, setAvailableDates] = useState([]);
 
   useEffect(() => {
     fetchService();
     fetchTimeSlots();
   }, [id]);
+
+  useEffect(() => {
+    filterSlotsByDate();
+  }, [selectedDate, timeSlots]);
 
   const fetchService = async () => {
     try {
@@ -34,46 +44,111 @@ function ServiceDetails() {
 
   const fetchTimeSlots = async () => {
     try {
-        const response = await axios.get('/time-slots');
-        // Filter slots by this service and those not booked
-        const freeSlots = response.data.filter(slot => slot.service_id == id && !slot.booked);
-        setTimeSlots(freeSlots);
+      const response = await axios.get('/time-slots');
+      const freeSlots = response.data.filter(
+        (slot) => slot.service_id == id && !slot.booked
+      );
+      setTimeSlots(freeSlots);
+
+      const dates = freeSlots.map((slot) =>
+        format(parseISO(slot.start_time), 'yyyy.MM.dd')
+      );
+      const uniqueDates = [...new Set(dates)];
+      setAvailableDates(uniqueDates);
     } catch (err) {
-        console.error('Error fetching time slots:', err);
-        setError('Failed to load time slots.');
+      console.error('Error fetching time slots:', err);
+      setError('Failed to load time slots.');
     }
-};
+  };
 
+  const filterSlotsByDate = () => {
+    if (!selectedDate) return;
 
-const bookAppointment = async (timeSlotId) => {
-  setBookingError(null);
-  setBookingSuccess(null);
-  try {
+    const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+
+    const slotsForDate = timeSlots.filter((slot) => {
+      const slotDate = format(parseISO(slot.start_time), 'yyyy-MM-dd');
+      return slotDate === formattedDate;
+    });
+
+    setAvailableSlots(slotsForDate);
+  };
+
+  const bookAppointment = async (timeSlotId) => {
+    setBookingError(null);
+    setBookingSuccess(null);
+    try {
       // Create a new appointment
       await axios.post('/appointment', {
-          service_id: id,
-          customer_id: customerId,
-          time_slot_id: timeSlotId,
-          status: 'pending'
+        service_id: id,
+        customer_id: customerId,
+        time_slot_id: timeSlotId,
+        status: 'pending',
       });
-
-      // After successful booking, remove the booked slot from the list
-      setTimeSlots(prevSlots => prevSlots.filter(slot => slot.id !== timeSlotId));
-  } catch (err) {
+  
+      // Update the time slots state
+      setTimeSlots((prevSlots) => {
+        const updatedSlots = prevSlots.filter((slot) => slot.id !== timeSlotId);
+  
+        // Check if there are any remaining slots for the same date
+        const bookedSlot = prevSlots.find((slot) => slot.id === timeSlotId);
+        const slotDate = format(parseISO(bookedSlot.start_time), 'yyyy.MM.dd');
+  
+        if (!updatedSlots.some((slot) =>
+          format(parseISO(slot.start_time), 'yyyy.MM.dd') === slotDate
+        )) {
+          // Remove the date from availableDates if no slots are left
+          setAvailableDates((prevDates) =>
+            prevDates.filter((date) => date !== slotDate)
+          );
+        }
+  
+        return updatedSlots;
+      });
+  
+      setBookingSuccess('Appointment booked successfully!');
+    } catch (err) {
       console.error('Error booking appointment:', err);
       if (err.response && err.response.status === 422) {
-          // Extract validation errors from the response
-          const validationErrors = err.response.data.errors;
-          const errorMessages = Object.values(validationErrors).flat().join(' ');
-          setBookingError(errorMessages);
+        const validationErrors = err.response.data.errors;
+        const errorMessages = Object.values(validationErrors)
+          .flat()
+          .join(' ');
+        setBookingError(errorMessages);
       } else if (err.response && err.response.status === 409) {
-          setBookingError('Time slot is already booked.');
+        setBookingError('Time slot is already booked.');
       } else {
-          setBookingError('Failed to book the selected time slot.');
+        setBookingError('Failed to book the selected time slot.');
       }
-  }
-};
+    }
+  };
+  
 
+  const tileClassName = ({ date, view }) => {
+    if (view === 'month') {
+      const formattedDate = format(date, 'yyyy.MM.dd');
+      if (availableDates.includes(formattedDate)) {
+        return 'available';
+      } else {
+        return 'unavailable';
+      }
+    }
+  };
+
+  const tileDisabled = ({ date, view }) => {
+    if (view === 'month') {
+      const formattedDate = format(date, 'yyyy.MM.dd');
+      return !availableDates.includes(formattedDate);
+    }
+    return false;
+  };
+
+  const displaySelectedDate = () => {
+    if (isToday(selectedDate)) {
+      return 'Today';
+    }
+    return format(selectedDate, 'dd.MM.yyyy');
+  };
 
   if (loading) {
     return <div className="service-details"><p>Loading service...</p></div>;
@@ -90,16 +165,25 @@ const bookAppointment = async (timeSlotId) => {
       <p><strong>Price:</strong> ${service.price}</p>
       <p><strong>Provider:</strong> {service.provider.name}</p>
 
-      <h2>Available Time Slots</h2>
+      <h2>Select a Date to View Available Time Slots</h2>
+      <Calendar
+        onChange={setSelectedDate}
+        value={selectedDate}
+        tileDisabled={tileDisabled}
+        tileClassName={tileClassName}
+      />
+
+      <h2>Available Time Slots for {displaySelectedDate()}</h2>
       {bookingError && <p className="error">{bookingError}</p>}
-      {timeSlots.length === 0 ? (
-        <p>No available time slots for this service.</p>
+      {bookingSuccess && <p className="success">{bookingSuccess}</p>}
+      {availableSlots.length === 0 ? (
+        <p>No available time slots for this date.</p>
       ) : (
         <ul className="time-slot-list">
-          {timeSlots.map(slot => (
+          {availableSlots.map((slot) => (
             <li key={slot.id}>
-              <p><strong>Start:</strong> {slot.start_time}</p>
-              <p><strong>End:</strong> {slot.end_time}</p>
+              <p><strong>Start:</strong> {format(parseISO(slot.start_time), 'HH:mm')}</p>
+              <p><strong>End:</strong> {format(parseISO(slot.end_time), 'HH:mm')}</p>
               <button onClick={() => bookAppointment(slot.id)}>Book this slot</button>
             </li>
           ))}

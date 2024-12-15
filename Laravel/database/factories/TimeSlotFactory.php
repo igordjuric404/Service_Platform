@@ -13,11 +13,18 @@ class TimeSlotFactory extends Factory
 
     public function definition(): array
     {
-        $start = $this->faker->dateTimeBetween('now', '+1 month');
+        $workingHours = range(8, 18);
+
+        $randomDate = $this->faker->dateTimeBetween('now', '+1 month');
+
+        $hour = $this->faker->randomElement($workingHours);
+
+        $start = new \DateTime($randomDate->format('Y-m-d') . ' ' . $hour . ':00:00');
+
         $end = (clone $start)->modify('+1 hour');
 
         return [
-            'provider_id' => User::factory(),
+            'provider_id' => User::factory(), 
             'service_id' => Service::factory(), 
             'start_time' => $start->format('Y-m-d H:i:s'),
             'end_time' => $end->format('Y-m-d H:i:s'),
