@@ -20,17 +20,22 @@ class TimeSlotController extends Controller
 
     public function store(Request $request)
     {
+        // Validate incoming data for creating a TimeSlot
         $validatedData = $request->validate([
             'provider_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
             'start_time' => 'required|date_format:Y-m-d H:i:s',
             'end_time' => 'required|date_format:Y-m-d H:i:s|after:start_time',
-            'booked' => 'required|boolean',
+            'booked' => 'sometimes|boolean', // Optional, defaults to false
         ]);
 
+        // Create the TimeSlot
         $timeSlot = TimeSlot::create($validatedData);
 
-        return response()->json(['message' => 'TimeSlot created successfully', 'time_slot' => $timeSlot], 201);
+        return response()->json([
+            'message' => 'TimeSlot created successfully',
+            'time_slot' => $timeSlot
+        ], 201);
     }
 
     public function update(Request $request, $id)
@@ -47,7 +52,10 @@ class TimeSlotController extends Controller
 
         $timeSlot->update($validatedData);
 
-        return response()->json(['message' => 'TimeSlot updated successfully', 'time_slot' => $timeSlot]);
+        return response()->json([
+            'message' => 'TimeSlot updated successfully',
+            'time_slot' => $timeSlot
+        ]);
     }
 
     public function destroy($id)
@@ -55,6 +63,8 @@ class TimeSlotController extends Controller
         $timeSlot = TimeSlot::findOrFail($id);
         $timeSlot->delete();
 
-        return response()->json(['message' => 'TimeSlot deleted successfully']);
+        return response()->json([
+            'message' => 'TimeSlot deleted successfully'
+        ]);
     }
 }

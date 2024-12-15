@@ -20,9 +20,5 @@ class UserSeeder extends Seeder
         $customers = User::factory()->count(3)->create([
             'type' => 'customer'
         ]);
-
-        $this->command->info("Freelancer: $freelancer->id");
-        $this->command->info("Company: $company->id");
-        $this->command->info("Customers: " . $customers->pluck('id')->join(', '));
     }
 }

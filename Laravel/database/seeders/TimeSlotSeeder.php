@@ -15,7 +15,7 @@ class TimeSlotSeeder extends Seeder
         $freelancer = User::where('type', 'freelancer')->first();
         $company = User::where('type', 'company')->first();
 
-        for ($i = 0; $i < 10; $i++) {
+        for ($i = 0; $i < 30; $i++) {
             $service = $services->random();
 
             TimeSlot::factory()->create([

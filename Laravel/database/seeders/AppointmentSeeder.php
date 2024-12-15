@@ -7,23 +7,49 @@ use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\TimeSlot;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AppointmentSeeder extends Seeder
 {
     public function run()
     {
+        // Retrieve all customers
         $customers = User::where('type', 'customer')->get();
-        $timeSlots = TimeSlot::all();
+
+        // Retrieve all available (not booked) time slots
+        $availableTimeSlots = TimeSlot::where('booked', false)->get();
+
+        // Shuffle the available time slots to ensure randomness
+        $availableTimeSlots = $availableTimeSlots->shuffle();
+
+        // Define the number of appointments per customer
+        $appointmentsPerCustomer = 3;
 
         foreach ($customers as $customer) {
-            $timeSlots->random(3)->each(function ($timeSlot) use ($customer) {
-                Appointment::create([
-                    'service_id' => $timeSlot->service_id,
-                    'customer_id' => $customer->id,
-                    'time_slot_id' => $timeSlot->id,
-                    'status' => fake()->randomElement(['pending', 'confirmed', 'cancelled']),
-                ]);
-            });
+            for ($i = 0; $i < $appointmentsPerCustomer; $i++) {
+                // Check if there are enough available time slots
+                if ($availableTimeSlots->isEmpty()) {
+                    $this->command->info('No more available time slots to assign.');
+                    return;
+                }
+
+                // Get the next available time slot
+                $timeSlot = $availableTimeSlots->pop();
+
+                // Create the appointment within a transaction
+                DB::transaction(function () use ($customer, $timeSlot) {
+                    // Create the appointment
+                    Appointment::create([
+                        'service_id' => $timeSlot->service_id,
+                        'customer_id' => $customer->id,
+                        'time_slot_id' => $timeSlot->id,
+                        'status' => fake()->randomElement(['pending', 'confirmed', 'cancelled']),
+                    ]);
+
+                    // Mark the time slot as booked
+                    $timeSlot->update(['booked' => true]);
+                });
+            }
         }
     }
 }

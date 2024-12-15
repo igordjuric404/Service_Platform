@@ -16,8 +16,8 @@ class AppointmentFactory extends Factory
     {
         return [
             'service_id' => Service::factory(),
-            'customer_id' => User::factory(),
-            'time_slot_id' => TimeSlot::factory(),
+            'customer_id' => User::factory(), 
+            'time_slot_id' => null,
             'status' => $this->faker->randomElement(['pending', 'confirmed', 'cancelled']),
         ];
     }

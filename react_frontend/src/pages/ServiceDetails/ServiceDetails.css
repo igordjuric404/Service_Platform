@@ -8,6 +8,35 @@
   margin-bottom: 1rem;
 }
 
-.service-details p {
-  margin: 0.5rem 0;
+.time-slot-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.time-slot-list li {
+  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 5px;
+}
+
+.time-slot-list li p {
+  margin: 0.3rem 0;
+}
+
+.time-slot-list button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.time-slot-list button:hover {
+  background-color: #45a049;
+}
+
+.error {
+  color: red;
+  margin-bottom: 1rem;
 }
