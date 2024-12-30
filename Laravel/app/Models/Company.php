@@ -12,12 +12,4 @@ class Company extends Provider
             $builder->where('type', 'company');
         });
     }
-
-    public function isVerified()
-    {
-        $serviceCount = $this->services()->count();
-        $averageRating = $this->reviews()->avg('rating');
-
-        return $serviceCount >= 10 && $averageRating > 4.5;
-    }
 }

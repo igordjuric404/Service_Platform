@@ -29,4 +29,4 @@ class Provider extends User
     {
         return $this->hasManyThrough(Appointment::class, Service::class, 'provider_id', 'service_id');
     }
-}
+  }

@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import axiosInstance from '../../api/axios';
+import { RiVerifiedBadgeFill } from "react-icons/ri";
 import { Link } from 'react-router-dom';
 import './ProvidersList.css';
 import Pagination from '../../components/Pagination/Pagination';
+
 
 function ProvidersList() {
   // **Input States**
@@ -159,18 +161,26 @@ function ProvidersList() {
       ) : (
         <>
           <ul className="provider-items">
-            {providers.map(provider => (
-              <li key={provider.id} className="provider-item">
-                <h2>
-                  <Link to={`/provider/${provider.id}`}>{provider.name}</Link>
-                </h2>
-                <p><strong>Type:</strong> {provider.type}</p>
-                <p><strong>Email:</strong> {provider.email}</p>
-                <p><strong>Rating:</strong> {provider.average_rating !== 'N/A' ? Number(provider.average_rating).toFixed(2) : 'No rating'}</p>
-                <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
-              </li>
-            ))}
+            {providers.map(provider => {
+              console.log(provider); // Debugging: Log each provider
+              return (
+                <li key={provider.id} className="provider-item">
+                  <h2>
+                    <Link to={`/provider/${provider.id}`}>{provider.name}</Link>
+                    {provider.is_verified && (
+                      <span className="verified-checkmark" title="Verified Provider"><RiVerifiedBadgeFill/></span>
+                    )}
+                  </h2>
+                  <p><strong>Type:</strong> {provider.type}</p>
+                  <p><strong>Email:</strong> {provider.email}</p>
+                  <p><strong>Rating:</strong> {provider.average_rating !== 'N/A' ? Number(provider.average_rating).toFixed(2) : 'No rating'}</p>
+                  <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
+                </li>
+              );
+            })}
           </ul>
+
+
           
           <Pagination 
             currentPage={currentPage}

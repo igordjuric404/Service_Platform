@@ -70,14 +70,20 @@ class ProviderController extends Controller
 
         try {
             $providers = $query->paginate($perPage, ['*'], 'page', $page);
+
             $transformedData = collect($providers->items())->map(function ($provider) {
+                $isVerified = ($provider->appointments_count >= 5) && ($provider->reviews_avg_rating >= 4);
+
                 return [
                     'id' => $provider->id,
                     'name' => $provider->name,
                     'type' => $provider->type,
                     'email' => $provider->email,
-                    'average_rating' => $provider->reviews_avg_rating ? round($provider->reviews_avg_rating, 2) : 'N/A',
+                    'average_rating' => $provider->reviews_avg_rating
+                        ? round($provider->reviews_avg_rating, 2)
+                        : 'N/A',
                     'total_appointments' => $provider->appointments_count,
+                    'is_verified' => $isVerified,
                 ];
             });
 
@@ -105,13 +111,18 @@ class ProviderController extends Controller
                 ->withAvg('reviews', 'rating')
                 ->findOrFail($id);
 
+            $isVerified = ($provider->appointments_count >= 5) && ($provider->reviews_avg_rating >= 4);
+
             $data = [
                 'id' => $provider->id,
                 'name' => $provider->name,
                 'type' => $provider->type,
                 'email' => $provider->email,
-                'average_rating' => $provider->reviews_avg_rating ? round($provider->reviews_avg_rating, 2) : 'N/A',
+                'average_rating' => $provider->reviews_avg_rating
+                    ? round($provider->reviews_avg_rating, 2)
+                    : 'N/A',
                 'total_appointments' => $provider->appointments_count,
+                'is_verified' => $isVerified,
                 'services' => $provider->services->map(function ($service) {
                     return [
                         'id' => $service->id,

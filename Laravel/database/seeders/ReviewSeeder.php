@@ -11,9 +11,11 @@ class ReviewSeeder extends Seeder
 {
     public function run()
     {
+        // Get all customers with type 'customer'
         $customers = User::where('type', 'customer')->get();
 
         foreach ($customers as $customer) {
+            // Fetch confirmed appointments for the customer that have associated providers
             $confirmedAppointments = Appointment::where('customer_id', $customer->id)
                 ->where('status', 'confirmed')
                 ->whereHas('service', function ($query) {
@@ -22,22 +24,13 @@ class ReviewSeeder extends Seeder
                 ->get();
 
             foreach ($confirmedAppointments as $index => $appointment) {
-                // **Optionally skip the first appointment if desired**
-                /*
-                if ($index === 0) {
-                    continue;
-                }
-                */
-
-                // Check if the appointment already has a review
+                // Skip if the appointment already has a review
                 if (!$appointment->review) {
-                    // **Create a review using the factory or directly**
-                    Review::create([
+                    // Use the factory to create a review
+                    Review::factory()->create([
                         'customer_id' => $customer->id,
                         'provider_id' => $appointment->service->provider_id,
                         'appointment_id' => $appointment->id,
-                        'rating' => rand(1, 5),
-                        'comment' => fake()->sentence(),
                     ]);
                 }
             }

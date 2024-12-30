@@ -177,6 +177,14 @@
   color: var(--text-color);
 }
 
+.verified-checkmark {
+  color: #1bafff;
+  margin-left: 0.5rem;
+  font-size: 1.6rem; 
+  vertical-align: middle;
+}
+
+
 @media (max-width: 600px) {
   .filters-container {
     padding: 1rem;
@@ -190,3 +198,4 @@
     font-size: 1.25rem;
   }
 }
+
