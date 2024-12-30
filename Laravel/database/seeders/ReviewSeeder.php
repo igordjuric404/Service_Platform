@@ -16,14 +16,22 @@ class ReviewSeeder extends Seeder
         foreach ($customers as $customer) {
             $confirmedAppointments = Appointment::where('customer_id', $customer->id)
                 ->where('status', 'confirmed')
+                ->whereHas('service', function ($query) {
+                    $query->whereNotNull('provider_id');
+                })
                 ->get();
 
             foreach ($confirmedAppointments as $index => $appointment) {
+                // **Optionally skip the first appointment if desired**
+                /*
                 if ($index === 0) {
                     continue;
                 }
+                */
 
+                // Check if the appointment already has a review
                 if (!$appointment->review) {
+                    // **Create a review using the factory or directly**
                     Review::create([
                         'customer_id' => $customer->id,
                         'provider_id' => $appointment->service->provider_id,

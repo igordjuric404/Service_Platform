@@ -22,8 +22,8 @@ class AppointmentSeeder extends Seeder
         // Shuffle the available time slots to ensure randomness
         $availableTimeSlots = $availableTimeSlots->shuffle();
 
-        // Define the number of appointments per customer
-        $appointmentsPerCustomer = 3;
+        // **Define the number of appointments per customer**
+        $appointmentsPerCustomer = 5; // Increased from 3 to 5
 
         foreach ($customers as $customer) {
             for ($i = 0; $i < $appointmentsPerCustomer; $i++) {
@@ -43,7 +43,8 @@ class AppointmentSeeder extends Seeder
                         'service_id' => $timeSlot->service_id,
                         'customer_id' => $customer->id,
                         'time_slot_id' => $timeSlot->id,
-                        'status' => fake()->randomElement(['pending', 'confirmed', 'cancelled']),
+                        // **Ensure a higher probability for 'confirmed' status**
+                        'status' => fake()->randomElement(['pending', 'confirmed', 'confirmed', 'cancelled']),
                     ]);
 
                     // Mark the time slot as booked

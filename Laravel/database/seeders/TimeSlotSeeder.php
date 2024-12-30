@@ -12,16 +12,18 @@ class TimeSlotSeeder extends Seeder
     public function run()
     {
         $services = Service::all();
-        $freelancer = User::where('type', 'freelancer')->first();
-        $company = User::where('type', 'company')->first();
+        $providers = User::whereIn('type', ['freelancer', 'company'])->get();
 
-        for ($i = 0; $i < 30; $i++) {
-            $service = $services->random();
+        // **Define the number of time slots per service**
+        $timeSlotsPerService = 5; // Adjust based on needs
 
-            TimeSlot::factory()->create([
-                'provider_id' => $service->provider_id,
-                'service_id' => $service->id,
-            ]);
+        foreach ($services as $service) {
+            for ($i = 0; $i < $timeSlotsPerService; $i++) {
+                TimeSlot::factory()->create([
+                    'provider_id' => $service->provider_id,
+                    'service_id' => $service->id,
+                ]);
+            }
         }
     }
 }

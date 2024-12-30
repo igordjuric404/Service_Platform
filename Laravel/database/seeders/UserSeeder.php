@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             'type' => 'company'
         ]);
 
-        $customers = User::factory()->count(3)->create([
+        $customers = User::factory()->count(20)->create([
             'type' => 'customer'
         ]);
     }
