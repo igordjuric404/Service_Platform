@@ -225,8 +225,12 @@ function ProviderDetails() {
           <ul className="review-items">
             {filteredReviews.map(review => (
               <li key={review.id} className="review-item">
-                <p><strong>Customer:</strong> {review.customer.name}</p>
-                <p><strong>Rating:</strong> {review.rating} / 5</p>
+                <p>
+                  <strong>Customer:</strong> {review.customer?.name || 'Unknown'}
+                </p>
+                <p>
+                  <strong>Rating:</strong> {review.rating} / 5
+                </p>
                 <p>{review.comment}</p>
               </li>
             ))}

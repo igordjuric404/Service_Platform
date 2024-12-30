@@ -3,6 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Review;
+use App\Models\Appointment;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ReviewFactory extends Factory
@@ -12,9 +14,17 @@ class ReviewFactory extends Factory
     public function definition()
     {
         return [
-            'customer_id' => null, // To be set in the seeder
-            'provider_id' => null, // To be set in the seeder
-            'appointment_id' => null, // To be set in the seeder
+            'customer_id' => function () {
+                return User::factory()->state(['type' => 'customer'])->create()->id;
+            },
+
+            'provider_id' => function () {
+                return User::factory()->state(['type' => 'freelancer'])->create()->id;
+            },
+
+            'appointment_id' => function () {
+                return Appointment::factory()->create()->id;
+            },
             'rating' => $this->weightedRandomRating(),
             'comment' => $this->faker->sentence(),
         ];
@@ -29,11 +39,11 @@ class ReviewFactory extends Factory
     {
         // Define the weights for each rating (higher weights for 4 and 5)
         $weights = [
-            1 => 3,  // 3% chance
-            2 => 5, // 5% chance
-            3 => 7, // 7% chance
-            4 => 25, // 25% chance
-            5 => 60, // 60% chance
+            1 => 3,   // 3% chance
+            2 => 5,   // 5% chance
+            3 => 7,   // 7% chance
+            4 => 25,  // 25% chance
+            5 => 60,  // 60% chance
         ];
 
         // Create an array where each rating appears as many times as its weight
