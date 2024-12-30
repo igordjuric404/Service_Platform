@@ -2,80 +2,61 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axiosInstance from '../../api/axios';
 import { Link } from 'react-router-dom';
 import './ProvidersList.css';
+import Pagination from '../../components/Pagination/Pagination';
 
 function ProvidersList() {
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Filters and Sorting
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredProviders, setFilteredProviders] = useState([]);
   const [minRating, setMinRating] = useState(0);
   const [minAppointments, setMinAppointments] = useState(0);
   const [sortOption, setSortOption] = useState('name-asc');
+  
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage] = useState(9);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProviders, setTotalProviders] = useState(0);
 
-  useEffect(() => {
-    fetchProviders();
-  }, []);
-
-  const fetchProviders = async () => {
+  const fetchProviders = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      const response = await axiosInstance.get('/providers');
-      setProviders(response.data);
-      setFilteredProviders(response.data);
+      const params = {
+        search: searchTerm,
+        min_rating: minRating,
+        min_appointments: minAppointments,
+        sort: sortOption,
+        page: currentPage,
+        per_page: perPage,
+      };
+
+      const response = await axiosInstance.get('/providers', { params });
+      console.log('Fetching providers with params:', params);
+
+      setProviders(response.data.data);
+      setCurrentPage(response.data.current_page);
+      setTotalPages(response.data.last_page);
+      setTotalProviders(response.data.total);
       setLoading(false);
     } catch (err) {
       setError('Failed to load providers.');
       setLoading(false);
     }
-  };
-
-  const applyFiltersAndSorting = useCallback(() => {
-    let filtered = [...providers];
-
-    if (searchTerm) {
-      filtered = filtered.filter(provider =>
-        provider.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        provider.type.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (minRating > 0) {
-      filtered = filtered.filter(provider => provider.average_rating >= minRating);
-    }
-
-    if (minAppointments > 0) {
-      filtered = filtered.filter(provider => provider.total_appointments >= minAppointments);
-    }
-
-    switch (sortOption) {
-      case 'name-asc':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'name-desc':
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-        break;
-      case 'rating-asc':
-        filtered.sort((a, b) => a.average_rating - b.average_rating);
-        break;
-      case 'rating-desc':
-        filtered.sort((a, b) => b.average_rating - a.average_rating);
-        break;
-      case 'appointments-asc':
-        filtered.sort((a, b) => a.total_appointments - b.total_appointments);
-        break;
-      case 'appointments-desc':
-        filtered.sort((a, b) => b.total_appointments - a.total_appointments);
-        break;
-      default:
-        break;
-    }
-
-    setFilteredProviders(filtered);
-  }, [providers, searchTerm, minRating, minAppointments, sortOption]);
+  }, [searchTerm, minRating, minAppointments, sortOption, currentPage, perPage]);
 
   useEffect(() => {
-    applyFiltersAndSorting();
-  }, [applyFiltersAndSorting]);
+    fetchProviders();
+  }, [fetchProviders]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    
+  }, [searchTerm, minRating, minAppointments, sortOption]);
 
   if (loading) {
     return <div className="providers-list"><p>Loading providers...</p></div>;
@@ -108,7 +89,7 @@ function ProvidersList() {
                 max="5"
                 step="0.1"
                 value={minRating}
-                onChange={(e) => setMinRating(+e.target.value)}
+                onChange={(e) => setMinRating(e.target.value)}
                 className="filter-input"
               />
             </label>
@@ -120,7 +101,7 @@ function ProvidersList() {
                 type="number"
                 min="0"
                 value={minAppointments}
-                onChange={(e) => setMinAppointments(+e.target.value)}
+                onChange={(e) => setMinAppointments(e.target.value)}
                 className="filter-input"
               />
             </label>
@@ -144,20 +125,28 @@ function ProvidersList() {
           </div>
         </div>
       </div>
-      {filteredProviders.length === 0 ? (
+      {providers.length === 0 ? (
         <p>No providers found.</p>
       ) : (
-        <ul className="provider-items">
-          {filteredProviders.map(provider => (
-            <li key={provider.id} className="provider-item">
-              <h2><Link to={`/provider/${provider.id}`}>{provider.name}</Link></h2>
-              <p><strong>Type:</strong> {provider.type}</p>
-              <p><strong>Email:</strong> {provider.email}</p>
-              <p><strong>Rating:</strong> {provider.average_rating ? Number(provider.average_rating).toFixed(2) : 'N/A'}</p>
-              <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="provider-items">
+            {providers.map(provider => (
+              <li key={provider.id} className="provider-item">
+                <h2><Link to={`/provider/${provider.id}`}>{provider.name}</Link></h2>
+                <p><strong>Type:</strong> {provider.type}</p>
+                <p><strong>Email:</strong> {provider.email}</p>
+                <p><strong>Rating:</strong> {provider.average_rating !== 'N/A' ? Number(provider.average_rating).toFixed(2) : 'N/A'}</p>
+                <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
+              </li>
+            ))}
+          </ul>
+          <Pagination 
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+          <p>Total Providers: {totalProviders}</p>
+        </>
       )}
     </div>
   );
