@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProvidersExport;
 use App\Models\Provider;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProviderController extends Controller
 {
@@ -145,5 +147,10 @@ class ProviderController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Provider not found.'], 404);
         }
+    }
+
+    public function exportCsv()
+    {
+        return Excel::download(new ProvidersExport, 'providers.csv');
     }
 }

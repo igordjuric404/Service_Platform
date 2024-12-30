@@ -80,6 +80,26 @@ function ServicesList() {
     return filteredServices.slice(startIndex, endIndex);
   }, [filteredServices, currentPage, perPage]);
 
+  const handleExportCsv = () => {
+    axiosInstance({
+      url: '/services/export/csv',
+      method: 'GET',
+      responseType: 'blob',
+    })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'services.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        alert('Failed to export CSV.');
+      });
+  };
+
   if (loading) {
     return <div className="services-list"><p>Loading services...</p></div>;
   }
@@ -91,6 +111,9 @@ function ServicesList() {
   return (
     <div className="services-list">
       <h1>Available Services</h1>
+      <button onClick={handleExportCsv} className="export-csv-button">
+        Export Services to CSV
+      </button>
       <div className="filters-container">
         <div className="search-filter">
           <input

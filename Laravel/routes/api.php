@@ -24,6 +24,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 
 Route::get('/services', [ServiceController::class, 'index']);
 Route::get('/service/{id}', [ServiceController::class, 'show']);
+Route::get('/services/export/csv', [ServiceController::class, 'exportCsv'])->name('services.export.csv');
 
 Route::get('/appointments', [AppointmentController::class, 'index']); 
 Route::get('/appointment/{id}', [AppointmentController::class, 'show']);
@@ -33,6 +34,8 @@ Route::get('/time-slot/{id}', [TimeSlotController::class, 'show']);
 
 Route::get('/providers', [ProviderController::class, 'index']);
 Route::get('/provider/{id}', [ProviderController::class, 'show']);
+Route::get('/providers/export/csv', [ProviderController::class, 'exportCsv'])->name('providers.export.csv');
+
 
 Route::middleware('auth:api')->group(function () {
   Route::get('/user', function (Request $request) {

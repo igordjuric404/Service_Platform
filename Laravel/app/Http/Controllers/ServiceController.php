@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Exports\ServicesExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ServiceController extends Controller
 {
@@ -56,16 +58,21 @@ class ServiceController extends Controller
     }
 
     public function getProviderServices()
-{
-    $userId = Auth::id();
+    {
+        $userId = Auth::id();
 
-    if (!$userId) {
-        return response()->json(['message' => 'Unauthorized'], 401);
+        if (!$userId) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        // Fetch services where the logged-in user is the provider
+        $services = Service::where('provider_id', $userId)->get();
+
+        return response()->json($services);
     }
 
-    // Fetch services where the logged-in user is the provider
-    $services = Service::where('provider_id', $userId)->get();
-
-    return response()->json($services);
-}
+    public function exportCsv()
+    {
+        return Excel::download(new ServicesExport, 'services.csv');
+    }
 }

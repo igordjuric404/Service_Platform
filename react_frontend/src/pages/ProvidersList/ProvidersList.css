@@ -184,6 +184,23 @@
   vertical-align: middle;
 }
 
+.export-csv-button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.export-csv-button:hover {
+  background-color: #45a049;
+}
 
 @media (max-width: 600px) {
   .filters-container {

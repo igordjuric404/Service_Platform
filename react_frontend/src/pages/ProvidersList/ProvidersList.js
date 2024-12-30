@@ -5,38 +5,28 @@ import { Link } from 'react-router-dom';
 import './ProvidersList.css';
 import Pagination from '../../components/Pagination/Pagination';
 
-
 function ProvidersList() {
-  // **Input States**
   const [searchInput, setSearchInput] = useState('');
   const [minRatingInput, setMinRatingInput] = useState(0);
   const [minAppointmentsInput, setMinAppointmentsInput] = useState(0);
   const [sortOptionInput, setSortOptionInput] = useState('name-asc');
-
-  // **Filters State**
   const [filters, setFilters] = useState({
     search: '',
     min_rating: 0,
     min_appointments: 0,
     sort: 'name-asc',
   });
-
-  // **Providers Data**
   const [providers, setProviders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // **Pagination**
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage] = useState(9);
   const [totalPages, setTotalPages] = useState(1);
   const [totalProviders, setTotalProviders] = useState(0);
 
-  // **Fetch Providers Based on Applied Filters**
   const fetchProviders = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const params = {
         search: filters.search,
@@ -46,10 +36,7 @@ function ProvidersList() {
         page: currentPage,
         per_page: perPage,
       };
-
       const response = await axiosInstance.get('/providers', { params });
-      console.log('Fetching providers with params:', params);
-
       setProviders(response.data.data);
       setCurrentPage(response.data.current_page);
       setTotalPages(response.data.last_page);
@@ -61,12 +48,10 @@ function ProvidersList() {
     }
   }, [filters, currentPage, perPage]);
 
-  // **Effect to Fetch Providers When Filters Change**
   useEffect(() => {
     fetchProviders();
   }, [fetchProviders]);
 
-  // **Handler to Apply Filters**
   const handleApplyFilters = () => {
     setFilters({
       search: searchInput,
@@ -74,14 +59,35 @@ function ProvidersList() {
       min_appointments: minAppointmentsInput,
       sort: sortOptionInput,
     });
-    setCurrentPage(1); // Reset to first page when filters are applied
+    setCurrentPage(1);
+  };
+
+  const handleExportCsv = () => {
+    axiosInstance({
+      url: '/providers/export/csv',
+      method: 'GET',
+      responseType: 'blob',
+    })
+      .then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'providers.csv');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((error) => {
+        alert('Failed to export CSV.');
+      });
   };
 
   return (
     <div className="providers-list">
       <h1>Available Providers</h1>
-      
-      {/* **Filters Form** */}
+      <button onClick={handleExportCsv} className="export-csv-button">
+        Export Providers to CSV
+      </button>
       <form onSubmit={(e) => { e.preventDefault(); handleApplyFilters(); }}>
         <div className="filters-container">
           <div className="search-filter">
@@ -93,7 +99,6 @@ function ProvidersList() {
               className="search-bar"
             />
           </div>
-          
           <div className="advanced-filters">
             <div className="filter-group">
               <label>
@@ -109,7 +114,6 @@ function ProvidersList() {
                 />
               </label>
             </div>
-            
             <div className="filter-group">
               <label>
                 Min Appointments:
@@ -122,7 +126,6 @@ function ProvidersList() {
                 />
               </label>
             </div>
-            
             <div className="filter-group">
               <label>
                 Sort By:
@@ -140,8 +143,6 @@ function ProvidersList() {
                 </select>
               </label>
             </div>
-            
-            {/* **Apply Filters Button** */}
             <div className="filter-group apply-filters">
               <button type="submit" className="apply-filters-button">
                 Apply Filters
@@ -150,8 +151,6 @@ function ProvidersList() {
           </div>
         </div>
       </form>
-      
-      {/* **Loading, Error, and Providers List** */}
       {loading ? (
         <p>Loading providers...</p>
       ) : error ? (
@@ -161,33 +160,26 @@ function ProvidersList() {
       ) : (
         <>
           <ul className="provider-items">
-            {providers.map(provider => {
-              console.log(provider); // Debugging: Log each provider
-              return (
-                <li key={provider.id} className="provider-item">
-                  <h2>
-                    <Link to={`/provider/${provider.id}`}>{provider.name}</Link>
-                    {provider.is_verified && (
-                      <span className="verified-checkmark" title="Verified Provider"><RiVerifiedBadgeFill/></span>
-                    )}
-                  </h2>
-                  <p><strong>Type:</strong> {provider.type}</p>
-                  <p><strong>Email:</strong> {provider.email}</p>
-                  <p><strong>Rating:</strong> {provider.average_rating !== 'N/A' ? Number(provider.average_rating).toFixed(2) : 'No rating'}</p>
-                  <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
-                </li>
-              );
-            })}
+            {providers.map(provider => (
+              <li key={provider.id} className="provider-item">
+                <h2>
+                  <Link to={`/provider/${provider.id}`}>{provider.name}</Link>
+                  {provider.is_verified && (
+                    <span className="verified-checkmark" title="Verified Provider"><RiVerifiedBadgeFill/></span>
+                  )}
+                </h2>
+                <p><strong>Type:</strong> {provider.type}</p>
+                <p><strong>Email:</strong> {provider.email}</p>
+                <p><strong>Rating:</strong> {provider.average_rating !== 'N/A' ? Number(provider.average_rating).toFixed(2) : 'No rating'}</p>
+                <p><strong>Total Appointments:</strong> {provider.total_appointments}</p>
+              </li>
+            ))}
           </ul>
-
-
-          
           <Pagination 
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={setCurrentPage}
           />
-          
           <p>Total Providers: {totalProviders}</p>
         </>
       )}
