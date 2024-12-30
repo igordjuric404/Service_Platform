@@ -72,6 +72,28 @@
   color: var(--text-color);
 }
 
+.filter-group.apply-filters {
+  flex: 1 1 100%; /* Allows the filter group to take full width */
+  display: flex; /* Enables flex layout for alignment */
+  justify-content: center; /* Centers the button horizontally */
+  margin-top: 1rem; /* Adds space above the button */
+}
+
+.apply-filters-button {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+.apply-filters-button:hover {
+  transform: translateY(-2px);
+}
+
 .filter-input,
 .filter-select {
   margin-top: 0.5rem;
