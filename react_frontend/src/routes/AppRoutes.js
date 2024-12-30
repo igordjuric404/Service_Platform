@@ -9,6 +9,7 @@ import ServiceDetails from "../pages/ServiceDetails/ServiceDetails";
 import ProvidersList from '../pages/ProvidersList/ProvidersList';
 import ProviderDetails from '../pages/ProviderDetails/ProviderDetails';
 import ProfilePage from '../pages/ProfilePage/ProfilePage';
+import ProtectedRoute from '../components/ProtectedRoute/ProtectedRoute';
 
 function AppRoutes() {
     return (
@@ -20,9 +21,18 @@ function AppRoutes() {
                 <Route path="/service/:id" element={<ServiceDetails />} />
                 <Route path="/providers" element={<ProvidersList />} />
                 <Route path="/provider/:id" element={<ProviderDetails />} />
-                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
+
+                {/* Protected Route */}
+                <Route
+                    path="/profile"
+                    element={
+                        <ProtectedRoute>
+                            <ProfilePage />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </Router>
     );

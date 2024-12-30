@@ -24,11 +24,9 @@ function Register() {
             const response = await axiosInstance.post('/register', formData);
             console.log('Registration response:', response);
 
-            // Save access token to localStorage
             const { access_token, token_type } = response.data;
             localStorage.setItem('access_token', access_token);
 
-            // Set Axios Authorization header
             setAuthToken(`${token_type} ${access_token}`);
 
             setMessage(response.data.message || 'Registration successful!');

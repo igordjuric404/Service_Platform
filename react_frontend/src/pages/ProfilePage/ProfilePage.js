@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axiosInstance from '../../api/axios';
 import { format, parseISO } from 'date-fns';
 import './ProfilePage.css';
+import { AuthContext } from '../../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function ProfilePage() {
+  const { isLoggedIn } = useContext(AuthContext);
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,8 +28,12 @@ function ProfilePage() {
   const [reviewSuccess, setReviewSuccess] = useState(null);
 
   useEffect(() => {
+    if (!isLoggedIn) {
+      navigate('/login');
+      return;
+    }
     fetchUserData();
-  }, []);
+  }, [isLoggedIn, navigate]);
 
   useEffect(() => {
     if (user) {
@@ -217,6 +226,7 @@ function ProfilePage() {
         <p>
           <strong>Email:</strong> {user.email}
         </p>
+        {/* Optionally, add a logout button here */}
       </div>
 
       {user.type === 'customer' && (

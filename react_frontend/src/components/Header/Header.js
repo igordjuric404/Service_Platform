@@ -1,22 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
 import './Header.css';
 
 function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  const checkLoggedInStatus = () => {
-    const token = localStorage.getItem('access_token');
-    setIsLoggedIn(!!token);
-  };
-
-  useEffect(() => {
-    checkLoggedInStatus();
-  }, []);
+  const { isLoggedIn, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token');
-    setIsLoggedIn(false); 
+    logout();
+    navigate('/login');
   };
 
   return (
