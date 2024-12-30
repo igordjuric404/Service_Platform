@@ -9,11 +9,11 @@ class UserSeeder extends Seeder
 {
     public function run()
     {
-        $freelancer = User::factory()->create([
+        $freelancer = User::factory()->count(15)->create([
             'type' => 'freelancer'
         ]);
 
-        $company = User::factory()->create([
+        $company = User::factory()->count(5)->create([
             'type' => 'company'
         ]);
 

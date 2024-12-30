@@ -10,12 +10,11 @@ class ServiceSeeder extends Seeder
 {
     public function run()
     {
-        $freelancer = User::where('type', 'freelancer')->first();
-        $company = User::where('type', 'company')->first();
+        $providers = User::whereIn('type', ['freelancer', 'company'])->get();
 
-        for ($i = 0; $i < 10; $i++) {
-            Service::factory()->create([
-                'provider_id' => $i < 5 ? $freelancer->id : $company->id
+        foreach ($providers as $provider) {
+            Service::factory()->count(3)->create([
+                'provider_id' => $provider->id
             ]);
         }
     }
